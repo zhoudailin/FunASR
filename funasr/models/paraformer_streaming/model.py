@@ -482,6 +482,7 @@ class ParaformerStreaming(Paraformer):
         encoder_out, encoder_out_lens = self.encode_chunk(
             speech, speech_lengths, cache=cache, is_final=kwargs.get("is_final", False)
         )
+        print(f"🔹 encoder_OUTPUT: encoder_out.shape={encoder_out.shape if hasattr(encoder_out, 'shape') else encoder_out}, encoder_out_lens={encoder_out_lens}")
         if isinstance(encoder_out, tuple):
             encoder_out = encoder_out[0]
 
@@ -495,13 +496,16 @@ class ParaformerStreaming(Paraformer):
             predictor_outs[2],
             predictor_outs[3],
         )
+        print(f"🔹 cif_search_OUTPUT: pre_acoustic_embeds.shape={pre_acoustic_embeds.shape if hasattr(pre_acoustic_embeds, 'shape') else pre_acoustic_embeds}, pre_token_length={pre_token_length}, alphas.shape={alphas.shape if hasattr(alphas, 'shape') else alphas}")
         pre_token_length = pre_token_length.round().long()
         if torch.max(pre_token_length) < 1:
+            print("🚨 EMPTY_OUTPUT: pre_token_length < 1, returning []")
             return []
         decoder_outs = self.cal_decoder_with_predictor_chunk(
             encoder_out, encoder_out_lens, pre_acoustic_embeds, pre_token_length, cache=cache
         )
         decoder_out, ys_pad_lens = decoder_outs[0], decoder_outs[1]
+        print(f"🔹 decoder_OUTPUT: decoder_out.shape={decoder_out.shape}, ys_pad_lens={ys_pad_lens}")
 
         results = []
         b, n, d = decoder_out.size()
@@ -551,6 +555,7 @@ class ParaformerStreaming(Paraformer):
 
                 results.extend(result_i)
 
+        print(f"🔹 streaming_paraformer_OUTPUT: results={results}")
         return results
 
     def inference(
@@ -620,6 +625,7 @@ class ParaformerStreaming(Paraformer):
                     cache=cache["frontend"],
                     is_final=kwargs["is_final"],
                 )
+                print(f"🔹 fbank_extractor_OUTPUT: speech.shape={speech.shape}, speech_lengths={speech_lengths}")
             time3 = time.perf_counter()
             meta_data["extract_feat"] = f"{time3 - time2:0.3f}"
             meta_data["batch_data_time"] = (

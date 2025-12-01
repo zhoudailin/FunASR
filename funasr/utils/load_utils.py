@@ -215,6 +215,7 @@ def extract_fbank(data, data_len=None, data_type: str = "sound", frontend=None, 
         data = pad_sequence(data_list, batch_first=True)  # data: [batch, N]
 
     data, data_len = frontend(data, data_len, **kwargs)
+    print(f"🔹 fbank_extractor_OUTPUT: data.shape={data.shape}, data_len={data_len}")
 
     if isinstance(data_len, (list, tuple)):
         data_len = torch.tensor([data_len])

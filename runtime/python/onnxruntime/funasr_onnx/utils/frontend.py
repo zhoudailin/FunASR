@@ -61,6 +61,7 @@ class WavFrontend:
             mat[i, :] = fbank_fn.get_frame(i)
         feat = mat.astype(np.float32)
         feat_len = np.array(mat.shape[0]).astype(np.int32)
+        print(f"🔹 PURE_FBANK_OUTPUT: feat.shape={feat.shape}, feat_len={feat_len}")
         return feat, feat_len
 
     def fbank_online(self, waveform: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
@@ -264,6 +265,8 @@ class WavFrontendOnline(WavFrontend):
                     mat[i, :] = self.fbank_fn.get_frame(i)
                 feat = mat.astype(np.float32)
                 feat_len = np.array(mat.shape[0]).astype(np.int32)
+                if i == 0:  # 只为第一个batch打印
+                    print(f"🔹 PURE_FBANK_OUTPUT: feat.shape={feat.shape}, feat_len={feat_len}")
                 feats.append(feat)
                 feats_lens.append(feat_len)
 
@@ -301,6 +304,8 @@ class WavFrontendOnline(WavFrontend):
 
         feats_lens = np.array(feats_lens)
         feats_pad = np.array(feats)
+        if len(feats) > 0:  # 只为第一个batch打印
+            print(f"🔹 lfr_cmvn_pe_OUTPUT: feats_pad.shape={feats_pad.shape}, feats_lens.shape={feats_lens.shape}")
         return feats_pad, feats_lens, lfr_splice_frame_idxs
 
     def extract_fbank(
